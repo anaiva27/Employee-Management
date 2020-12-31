@@ -15,55 +15,55 @@ const connection = mysql.createConnection({
 
   // Your password
   password: "",
-  database: "employees"
+  database: "employees",
 });
 
 // connect to the mysql server and sql database
-connection.connect(function(err) {
+connection.connect(function (err) {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
-   mainPrompt()
+  mainPrompt();
 });
 
-// class Db {
-//   constructor(connection){ 
-// this.connection = connection
-//   };
+class Db {
+  constructor(connection){
+this.connection = connection
+  };
 
-// // employee, department, role manipulation methods
-// viewAllEmployees(){
-//   return this.connection.query( "SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, roles.title, roles.salary, role.departmnent_id CONCAT(employee.manager_id)")}
+// employee, department, role manipulation methods
+viewAllEmployees(){
+  return this.connection.query("SELECT * FROM employees.roles" )}
 
-// viewAllDepartments(){
+viewAllDepartments(){
 
-// };
- 
-// viewAllRoles(){
+};
 
-// };
- 
-// addNewEmployee(){
+viewAllRoles(){
 
-// };
- 
-// addNewDepartment(){
+};
 
-// };
-  
-// addNewRole(){
+addNewEmployee(){
 
-// };
- 
-// updateTheRole(){
+};
 
-// };
-   
-// exitTheApp(){
-  
-// };
+addNewDepartment(){
 
-// // findManager(){}
-// }
+};
+
+addNewRole(){
+
+};
+
+updateTheRole(){
+
+};
+
+exitTheApp(){
+
+};
+
+// findManager(){}
+}
 
 function mainPrompt() {
   inquirer
@@ -93,6 +93,10 @@ function mainPrompt() {
           value: "ADD_DEPARTMENT",
         },
         {
+          name: "Delete a department",
+          value: "DELETE_DEPARTMENT",
+        },
+        {
           name: "Add a role",
           value: "ADD_ROLE",
         },
@@ -103,7 +107,7 @@ function mainPrompt() {
         {
           name: "Exit the application",
           value: "EXIT_APP",
-        } 
+        },
       ],
     })
     .then(function (response) {
@@ -121,14 +125,17 @@ function mainPrompt() {
           return addEmployee();
           break;
         case "ADD_DEPARTMENT":
-            return addDepartment();
-            break;
+          return addDepartment();
+          break;
+        case "DELETE_DEPARTMENT":
+          return deleteDepartment();
+          break;
         case "ADD_ROLE":
           return addRole();
           break;
         case "UPDATE_ROLE":
-            return updateRole();
-            break;
+          return updateRole();
+          break;
         case "EXIT_APP":
           return exitApp();
           break;
@@ -136,20 +143,87 @@ function mainPrompt() {
     });
 }
 
-function viewEmployees(){
-  // const employees = await db.viewAllEmployees();
-  connection.query("SELECT * FROM employees.roles", createTable
-  //  "SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary CONCAT(employee.manager_id)"
-   )
-
-  // console.log("\n");
-  // console.log(employees);
-  // console.table(employees);
-  // mainPrompt()
-}
-
 function createTable(error, res) {
   if (error) throw error;
   console.table(res);
   mainPrompt();
 }
+
+// let db = new Db(connection);
+
+// async 
+function viewEmployees() {
+//   const [employees] = await db.viewAllEmployees();
+// console.log(employees)
+//   console.table(employees);
+//   mainPrompt()
+  connection.query(
+    `SELECT 
+    employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary,
+    CONCAT(manager.first_name,' ',manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id`
+     , createTable 
+  );
+}
+
+function viewDepartments(){
+  connection.query(`SELECT * FROM department`, createTable)
+};
+
+function viewRoles(){
+  connection.query(`SELECT roles.id, roles.title, department.name AS department, roles.salary FROM roles LEFT JOIN department on roles.department_id = department.id`, createTable)
+};
+
+function addEmployee(){
+  inquirer.prompt({
+    name: "newEmployee",
+    type: "input",
+    message: "What department would you like to add?"
+  }).then(function(response){
+    connection.query(`INSERT INTO department (name) VALUES (?)`, response.newDepartment, function (err)  {
+      if (err) throw err;
+      createTable();})
+  })
+};
+
+function addDepartment(){
+  inquirer.prompt({
+    name: "newDepartment",
+    type: "input",
+    message: "What department would you like to add?"
+  }).then(function(response){
+    connection.query(`INSERT INTO department (name) VALUES (?)`, response.newDepartment, function (err)  {
+      if (err) throw err;
+      createTable();})
+  })
+};
+
+function deleteDepartment(){
+  inquirer.prompt({
+    name: "deleteDepartment",
+    type: "input",
+    message: "What is the ID of department you would like to delete?"
+  }).then(function(response){
+    connection.query(`DELETE FROM department WHERE id = ?`, response.deleteDepartment, function (err)  {
+      if (err) throw err;
+      console.log("----------");
+      console.log("Department has been removed")
+      console.log("----------");
+      mainPrompt();})
+  })
+}
+
+function addRole(){
+  inquirer.prompt({
+    name: "newDepartment",
+    type: "input",
+    message: "What department would you like to add?"
+  }).then(function(response){
+    connection.query(`INSERT INTO department (name) VALUES (?)`, response.newDepartment, function (err)  {
+      if (err) throw err;
+      createTable();})
+  })
+};
+
+function updateRole(){};
+
+function exitApp(){};

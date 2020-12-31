@@ -56,14 +56,14 @@ VALUES ('Sales manager', 10000, 1),
 INSERT INTO employee
 (first_name, last_name, role_id, manager_id)
 VALUES ('Anastasia', 'Warren', 2, NULL),
-('Jennifer', 'Morales', 3, 1),
-('Jordan', 'Rosso', 1, NULL),
+('Jennifer', 'Morales', 1, NULL),
+('Jordan', 'Rosso', 4, NULL),
 ('Chris', 'Nolan', 3, NULL),
-('Alexader', 'Crow', 4, 2),
-('Santa', 'Clauses', 4, NULL),
-('Britney', 'Green', 4, NULL),
-('Ryan', 'Simp', 4, NULL),
+('Alexader', 'Crow', 4, NULL),
+('Santa', 'Clauses', 2, 2),
+('Britney', 'Green', 5, NULL),
+('Ryan', 'Simp', 1, NULL),
 ('Jeff', 'McDonald', 4, NULL),
-('Brain', 'Kurts', 4, NULL),
-('John', 'Bawer', 4, NULL),
-('Daniel', 'Orzo', 4, NULL);
+('Brain', 'Kurts', 5, 4),
+('John', 'Bawer', 6, 4),
+('Daniel', 'Orzo', 7, 8);
