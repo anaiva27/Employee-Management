@@ -1,6 +1,6 @@
 const inquirer = require("inquirer");
 require("console.table");
-const util = require('util')
+const util = require("util");
 // const db = require("./db")
 const mysql = require("mysql");
 
@@ -20,28 +20,32 @@ const connection = mysql.createConnection({
 });
 
 // connect to the mysql server and sql database
-connection.query = util.promisify(connection.query)
+connection.query = util.promisify(connection.query);
 connection.connect(function (err) {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
   mainPrompt();
 });
 
+  // class with sql queries for employee, department, role manipulations
 class DB {
   constructor(connection) {
     this.connection = connection;
   }
-
-  // employee, department, role manipulation methods
   viewAllEmployees() {
     return this.connection.query(`SELECT 
    employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary,
   CONCAT(manager.first_name,' ',manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id`);
   }
 
-  viewAllDepartments() {}
+  viewAllDepartments() {
+    return connection.query(`SELECT * FROM department ORDER BY id`);
+  }
 
-  viewAllRoles() {}
+  viewAllRoles() {
+    return  connection.query(
+      `SELECT roles.id, roles.title, department.name AS department, roles.salary FROM roles LEFT JOIN department on roles.department_id = department.id ORDER BY roles.id`);
+  }
 
   addNewEmployee() {}
 
@@ -61,37 +65,6 @@ function mainPrompt() {
   departmentsId = [];
   managers = [];
   managersId = [];
-  
-
-  connection.query(
-    "SELECT * FROM department ORDER BY department.id",
-    function (err, res) {
-      if (err) throw err;
-      res.forEach((res2) => {
-        departments.push(res2.name);
-        departmentsId.push(res2.id);
-      });
-    }
-  );
-
-  connection.query("SELECT * FROM roles", function (err, res) {
-    res.forEach((res2) => {
-      if (err) throw err;
-      roles.push(res2.title);
-      rolesId.push(res2.id);
-    });
-  });
-
-  connection.query("SELECT * FROM employee", function (err, res) {
-    res.forEach((res2) => {
-      if (err) throw err;
-      if (!res2.manager_id) {
-        managers.push(res2.first_name + " " + res2.last_name);
-        managersId.push(res2.id);
-      }
-    });
-  });
-
   connection.query(
     "SELECT * FROM employee ORDER BY employee.id",
     function (err, res) {
@@ -102,6 +75,32 @@ function mainPrompt() {
       });
     }
   );
+  connection.query("SELECT * FROM employee", function (err, res) {
+    res.forEach((res2) => {
+      if (err) throw err;
+      if (!res2.manager_id) {
+        managers.push(res2.first_name + " " + res2.last_name);
+        managersId.push(res2.id);
+      }
+    });
+  });
+  connection.query(
+    "SELECT * FROM department ORDER BY department.id",
+    function (err, res) {
+      if (err) throw err;
+      res.forEach((res2) => {
+        departments.push(res2.name);
+        departmentsId.push(res2.id);
+      });
+    }
+  );
+  connection.query("SELECT * FROM roles", function (err, res) {
+    res.forEach((res2) => {
+      if (err) throw err;
+      roles.push(res2.title);
+      rolesId.push(res2.id);
+    });
+  });
 
   inquirer
     .prompt({
@@ -174,10 +173,8 @@ function mainPrompt() {
           return updateRole();
           break;
         case "EXIT_APP":
-          // ????
           connection.end();
           return console.log("You have exited the application");
-          
           break;
       }
     });
@@ -192,37 +189,24 @@ function createTable(error, res) {
 let db = new DB(connection);
 
 async function viewEmployees() {
-    const employees = await db.viewAllEmployees();
-  // console.log(employees)
-    console.table(employees);
-    // mainPrompt()
-  
-  // connection.query(
-  //   `SELECT 
-  //   employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary,
-  //   CONCAT(manager.first_name,' ',manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id`,
-  //   createTable
-  // );
+  const employees = await db.viewAllEmployees();
+  console.table(employees);
+  mainPrompt();
 }
 
-function viewDepartments() {
-  connection.query(`SELECT * FROM department ORDER BY id`, createTable);
+async function viewDepartments() {
+  const employees = await db.viewAllDepartments();
+  console.table(employees);
+  mainPrompt();
 }
 
-function viewRoles() {
-  connection.query(
-    `SELECT roles.id, roles.title, department.name AS department, roles.salary FROM roles LEFT JOIN department on roles.department_id = department.id ORDER BY roles.id`,
-    createTable
-  );
+async function viewRoles() {
+  const employees = await db.viewAllRoles();
+  console.table(employees);
+  mainPrompt(); 
 }
 
 function addEmployee() {
-  // connection.query('SELECT * FROM roles', function(err,res){
-  //   if (err) throw err;
-  //   let roles = res.forEach((res1) => {
-  //     return { name: res1.name, value: res1.id };
-  //     // roles.push(res1.title);
-  // })
   let questions = [
     {
       type: "input",
@@ -249,9 +233,7 @@ function addEmployee() {
   ];
 
   inquirer.prompt(questions).then(function (response) {
-  
-    
-        createTable();
+    createTable();
     //   }
     // );
   });
@@ -336,13 +318,13 @@ function addRole() {
       answer.departmentName,
       function (err, res) {
         if (err) throw err;
-        console.log(res)
+        console.log(res);
         connection.query(
           `INSERT INTO roles SET ?`,
           {
             title: answer.newRole,
             salary: answer.salary,
-            department_id:res[0].id,
+            department_id: res[0].id,
           },
           function (err, res) {
             if (err) throw err;
@@ -382,7 +364,6 @@ function deleteRole() {
       );
     });
 }
-
 
 function updateRole() {
   // need role, role id, employee, employee id
