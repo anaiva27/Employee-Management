@@ -50,7 +50,15 @@ class DB {
 
   addNewEmployee() {}
 
-  addNewDepartment() {}
+  addNewDepartment(){
+     return function (response) {
+      connection.query(
+        `INSERT INTO department (name) VALUES (?)`,
+        response.newDepartment,
+        function (err) {
+          if (err) throw err;
+        }
+  )}}
 
   addNewRole() {}
 
@@ -254,20 +262,19 @@ function addDepartment() {
       type: "input",
       message: "What department would you like to add?",
     })
-    .then(function (response) {
-      connection.query(
-        `INSERT INTO department (name) VALUES (?)`,
-        response.newDepartment,
-        function (err) {
-          if (err) throw err;
+    .then( async function (response){ 
+    const employees = await db.viewAllRoles(response);
+   
+
           console.log("----------");
           console.log("Department has been successfully added");
           console.log("----------");
-          createTable();
-        }
-      );
-    });
-}
+           console.table(employees);
+    mainPrompt();
+        })}
+      
+    
+
 
 function deleteDepartment() {
   inquirer
