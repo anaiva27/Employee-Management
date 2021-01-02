@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 require("console.table");
+const util = require('util')
 // const db = require("./db")
 const mysql = require("mysql");
 
@@ -19,6 +20,7 @@ const connection = mysql.createConnection({
 });
 
 // connect to the mysql server and sql database
+connection.query = util.promisify(connection.query)
 connection.connect(function (err) {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
@@ -32,10 +34,9 @@ class DB {
 
   // employee, department, role manipulation methods
   viewAllEmployees() {
-    return  this.connection.query("SELECT * FROM employees.roles")
-  //    this.connection.query(`SELECT 
-  //  employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary,
-  // CONCAT(manager.first_name,' ',manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id`);
+    return this.connection.query(`SELECT 
+   employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary,
+  CONCAT(manager.first_name,' ',manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id`);
   }
 
   viewAllDepartments() {}
@@ -255,8 +256,8 @@ function addEmployee() {
   
     
         createTable();
-      }
-    );
+    //   }
+    // );
   });
 }
 
@@ -284,7 +285,7 @@ function deleteDepartment() {
     .prompt({
       name: "deleteDepartment",
       type: "input",
-      message: "What is the ID of department you would like to delete?",
+      message: "What is the ID of the department you would like to delete?",
     })
     .then(function (response) {
       connection.query(
@@ -363,6 +364,29 @@ function addRole() {
   //       if (err) throw err;
   //       createTable();})
 }
+
+function deleteRole() {
+  inquirer
+    .prompt({
+      name: "deleteRole",
+      type: "input",
+      message: "What is the ID of the department you would like to delete?",
+    })
+    .then(function (response) {
+      connection.query(
+        `DELETE FROM department WHERE id = ?`,
+        response.deleteDepartment,
+        function (err) {
+          if (err) throw err;
+          console.log("----------");
+          console.log("Department has been removed");
+          console.log("----------");
+          mainPrompt();
+        }
+      );
+    });
+}
+
 
 function updateRole() {
   // need role, role id, employee, employee id
