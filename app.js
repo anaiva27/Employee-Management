@@ -239,32 +239,21 @@ function addEmployee() {
     },
     {
       type: "list",
-      message: `What is the employee's role?`,
+      message: `What is the new employee's role?`,
       choices: roles,
       name: "role",
     },
     {
       type: "list",
-      message: `Who is the employee's manager?`,
+      message: `Who is the new employee's manager?`,
       choices: managers,
       name: "manager",
     },
   ];
 
   inquirer.prompt(questions).then(function (response) {
-    let employeeRoleID = getID(roles, response.role);
-    let employeeManagerID = getID(employees, response.manager);
-    connection.query(
-      "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)",
-      [
-        response.firstName,
-        response.lastName,
-        employeeRoleID,
-        employeeManagerID,
-      ],
-      function (err) {
-        if (err) throw err;
-
+  
+    
         createTable();
       }
     );
