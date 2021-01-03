@@ -49,7 +49,20 @@ class DB {
     );
   }
 
-  addNewEmployee() {}
+  addNewEmployee(response) {
+    this.connection.query(
+      `INSERT INTO employee SET ?`,
+      {
+        first_name: response.firstName,
+        last_name: response.lastName,
+        role_id: response.role,
+        manager_id: response.manager,
+      },
+      function (err, res) {
+        if (err) throw err;
+             }
+    );
+  }
 
   addNewDepartment(response) {
     return this.connection.query(
@@ -61,7 +74,34 @@ class DB {
     );
   }
 
-  addNewRole() {}
+  addNewRole(answer) {
+    this.connection.query(
+      `SELECT id FROM department WHERE name = ?`,
+      answer.departmentName,
+      function (err, res) {
+        if (err) throw err;
+        console.log(res);
+        connection.query(
+          `INSERT INTO roles SET ?`,
+          {
+            title: answer.newRole,
+            salary: answer.salary,
+            department_id: res[0].id,
+          },
+          function (err, res) {
+            if (err) throw err;
+          }
+        );
+      }
+    );
+  }
+
+ deleteAnEmployee(response) {connection.query(
+    `DELETE FROM employee WHERE id = ?`,
+    response.deleteEmployee,
+    function (err) {
+      if (err) throw err;
+    })}
 
   updateTheRole() {}
 }
@@ -145,12 +185,16 @@ function mainPrompt() {
           value: "ADD_DEPARTMENT",
         },
         {
+          name: "Add a role",
+          value: "ADD_ROLE",
+        },
+        {
           name: "Delete a department",
           value: "DELETE_DEPARTMENT",
         },
         {
-          name: "Add a role",
-          value: "ADD_ROLE",
+          name: "Delete an employee",
+          value: "DELETE_EMPLOYEE",
         },
         {
           name: "Delete a role",
@@ -183,11 +227,14 @@ function mainPrompt() {
         case "ADD_DEPARTMENT":
           return addDepartment();
           break;
+        case "ADD_ROLE":
+          return addRole();
+          break;
         case "DELETE_DEPARTMENT":
           return deleteDepartment();
           break;
-        case "ADD_ROLE":
-          return addRole();
+        case "DELETE_EMPLOYEE":
+          return deleteEmployee();
           break;
         case "DELETE_ROLE":
           return deleteRole();
@@ -230,7 +277,7 @@ async function viewRoles() {
 }
 
 function addEmployee() {
-  managersId.push({name: "no manager", value: null})
+  managersId.push({ name: "no manager", value: null });
   let questions = [
     {
       type: "input",
@@ -257,21 +304,30 @@ function addEmployee() {
   ];
 
   inquirer.prompt(questions).then(function (response) {
-    connection.query(
-      `INSERT INTO employee SET ?`,
-      {
-        first_name: response.firstName,
-        last_name: response.lastName,
-        role_id: response.role,
-        manager_id: response.manager,
-      },
-      function (err, res) {
-        if (err) throw err;
-        console.log("The new role has been added");
-        mainPrompt();
-      }
-    );
+    db.addNewEmployee(response);
+    console.log("----------");
+    console.log("The new employee has been added");
+    console.log("----------");
+    mainPrompt();
+    
   });
+}
+
+function deleteEmployee() {
+  inquirer
+    .prompt({
+      name: "deleteEmployee",
+      type: "list",
+      message: "What is the name of the employee you would like to delete?",
+      choices: employeesId,
+    })
+    .then(function (response) {
+      db.deleteAnEmployee(response);
+          console.log("----------");
+          console.log("Employee has been successfully removed");
+          console.log("----------");
+          mainPrompt()
+    });
 }
 
 function addDepartment() {
@@ -336,29 +392,12 @@ function addRole() {
       choices: departments,
     },
   ];
-
   inquirer.prompt(questions).then(function (answer) {
-    connection.query(
-      `SELECT id FROM department WHERE name = ?`,
-      answer.departmentName,
-      function (err, res) {
-        if (err) throw err;
-        console.log(res);
-        connection.query(
-          `INSERT INTO roles SET ?`,
-          {
-            title: answer.newRole,
-            salary: answer.salary,
-            department_id: res[0].id,
-          },
-          function (err, res) {
-            if (err) throw err;
-            console.log("The new role has been added");
-            mainPrompt();
-          }
-        );
-      }
-    );
+    db.addNewRole(answer);
+    console.log("----------");
+    console.log("Role has been successfully added");
+    console.log("----------");
+    mainPrompt();
   });
 }
 

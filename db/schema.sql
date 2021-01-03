@@ -55,12 +55,12 @@ VALUES ('Sales manager', 10000, 1),
 
 INSERT INTO employee
 (first_name, last_name, role_id, manager_id)
-VALUES ('Anastasia', 'Warren', 2, NULL),
+VALUES ('Anastasia', 'Warren', 2, 1),
 ('Jennifer', 'Morales', 1, NULL),
 ('Jordan', 'Rosso', 4, 2),
 ('Chris', 'Nolan', 3, NULL),
 ('Alexader', 'Crow', 4, 4),
-('Santa', 'Clauses', 2, 2),
+('Santa', 'Clauses', 2, 1),
 ('Britney', 'Green', 5, 4),
 ('Ryan', 'Simp', 1, NULL),
 ('Jeff', 'McDonald', 4, 8),
