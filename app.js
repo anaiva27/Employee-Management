@@ -80,7 +80,7 @@ function mainPrompt() {
       if (err) throw err;
       res.forEach((res2) => {
         employees.push(`${res2.first_name} ${res2.last_name}`, res2.id);
-        employeesId.push(res2.id);
+        employeesId.push({name:`${res2.first_name} ${res2.last_name}`, value: res2.id});
       });
     }
   );
@@ -107,7 +107,7 @@ function mainPrompt() {
     res.forEach((res2) => {
       if (err) throw err;
       roles.push(res2.title);
-      rolesId.push(res2.id);
+      rolesId.push({name: res2.title, value:res2.id});
     });
   });
 
@@ -309,9 +309,9 @@ function addRole() {
       name: "salary",
       type: "input",
       message: "What is the salary?",
-      // validate: function (salary) {
-      //   return !isNaN(salary);
-      // }
+      validate: function (salary) {
+        return !isNaN(salary);
+      }
     },
     {
       name: "departmentName",
@@ -375,17 +375,18 @@ function updateRole() {
       name: "employee",
       type: "list",
       message: "What is the name of the employee?",
-      choices: employees,
+      choices: employeesId,
     },
     {
       name: "role",
       type: "list",
       message: "What is the new role?",
-      choices: roles,
+      choices: rolesId,
     },
   ]
   inquirer.prompt(roleUpdateQs).then(function (response) {
     console.log(response)
+    // connection.query(SELECT )
     connection. query('UPDATE employee SET ? WHERE ?', 
         [
             {
@@ -395,10 +396,6 @@ function updateRole() {
                 id: response.employee   
             }
         ],
-    
-    // query(
-    //       "UPDATE employee SET role_id = ? WHERE id = ?",
-    //   [response.role, response.employee],
 
       function (err) {
         if (err) throw err;
