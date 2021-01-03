@@ -27,10 +27,11 @@ CREATE TABLE employee (
      `role_id` INT NOT NULL,
      
     --  INDEX role_ind (role_id),
-     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
      `manager_id` INT,
-    PRIMARY KEY (id),--  INDEX manager_ind (manager_id),
-     FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
+    PRIMARY KEY (id),
+    --  INDEX manager_ind (manager_id),
+    FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
 
 );
 
