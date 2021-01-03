@@ -60,7 +60,7 @@ class DB {
       },
       function (err, res) {
         if (err) throw err;
-             }
+      }
     );
   }
 
@@ -96,22 +96,43 @@ class DB {
     );
   }
 
- deleteAnEmployee(response) {connection.query(
-    `DELETE FROM employee WHERE id = ?`,
-    response.deleteEmployee,
-    function (err) {
-      if (err) throw err;
-    })}
+  deleteAnEmployee(response) {
+    connection.query(
+      `DELETE FROM employee WHERE id = ?`,
+      response.deleteEmployee,
+      function (err) {
+        if (err) throw err;
+      }
+    );
+  }
 
-    deleteARole(response){ 
+  deleteARole(response) {
     this.connection.query(
       `DELETE FROM roles WHERE title = ?`,
       response.deleteRole,
       function (err) {
         if (err) throw err;
-    })}
+      }
+    );
+  }
 
-  updateTheRole() {}
+  updateARole(response) {
+    this.connection.query(
+      "UPDATE employee SET ? WHERE ?",
+      [
+        {
+          role_id: response.role,
+        },
+        {
+          id: response.employee,
+        },
+      ],
+
+      function (err) {
+        if (err) throw err;
+      }
+    );
+  }
 }
 
 function mainPrompt() {
@@ -313,7 +334,6 @@ function addEmployee() {
     console.log("The new employee has been added");
     console.log("----------");
     mainPrompt();
-    
   });
 }
 
@@ -327,10 +347,10 @@ function deleteEmployee() {
     })
     .then(function (response) {
       db.deleteAnEmployee(response);
-          console.log("----------");
-          console.log("Employee has been successfully removed");
-          console.log("----------");
-          mainPrompt()
+      console.log("----------");
+      console.log("Employee has been successfully removed");
+      console.log("----------");
+      mainPrompt();
     });
 }
 
@@ -415,11 +435,10 @@ function deleteRole() {
     })
     .then(function (response) {
       db.deleteARole(response);
-          console.log("----------");
-          console.log("Role has been successfully removed");
-          console.log("----------");
-          mainPrompt();
-    
+      console.log("----------");
+      console.log("Role has been successfully removed");
+      console.log("----------");
+      mainPrompt();
     });
 }
 
@@ -439,26 +458,10 @@ function updateRole() {
     },
   ];
   inquirer.prompt(roleUpdateQs).then(function (response) {
-    console.log(response);
-    // connection.query(SELECT )
-    connection.query(
-      "UPDATE employee SET ? WHERE ?",
-      [
-        {
-          role_id: response.role,
-        },
-        {
-          id: response.employee,
-        },
-      ],
-
-      function (err) {
-        if (err) throw err;
-        console.log("----------");
-        console.log("Role has been successfully updated");
-        console.log("----------");
-        mainPrompt();
-      }
-    );
+    db.updateARole(response);
+    console.log("----------");
+    console.log("Role has been successfully updated");
+    console.log("----------");
+    mainPrompt();
   });
 }
