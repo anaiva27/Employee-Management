@@ -103,6 +103,14 @@ class DB {
       if (err) throw err;
     })}
 
+    deleteARole(response){ 
+    this.connection.query(
+      `DELETE FROM roles WHERE title = ?`,
+      response.deleteRole,
+      function (err) {
+        if (err) throw err;
+    })}
+
   updateTheRole() {}
 }
 
@@ -250,14 +258,10 @@ function mainPrompt() {
     });
 }
 
-// function createTable(error, res) {
-//   if (error) throw error;
-//   console.table(res);
-//   mainPrompt();
-// }
-
+// creating database object
 let db = new DB(connection);
 
+// functions for the switch statements values
 async function viewEmployees() {
   const employees = await db.viewAllEmployees();
   console.table(employees);
@@ -410,17 +414,12 @@ function deleteRole() {
       choices: roles,
     })
     .then(function (response) {
-      connection.query(
-        `DELETE FROM roles WHERE title = ?`,
-        response.deleteRole,
-        function (err) {
-          if (err) throw err;
+      db.deleteARole(response);
           console.log("----------");
           console.log("Role has been successfully removed");
           console.log("----------");
           mainPrompt();
-        }
-      );
+    
     });
 }
 
@@ -463,16 +462,3 @@ function updateRole() {
     );
   });
 }
-
-// VALUES ('Anastasia', 'Warren', 2, 8),
-// ('Jennifer', 'Morales', 1, NULL),
-// ('Jordan', 'Rosso', 4, 8),
-// ('Chris', 'Nolan', 3, NULL),
-// ('Alexader', 'Crow', 4, 2),
-// ('Santa', 'Clauses', 2, 2),
-// ('Britney', 'Green', 5, 8),
-// ('Ryan', 'Simp', 1, NULL),
-// ('Jeff', 'McDonald', 4, 2),
-// ('Brain', 'Kurts', 5, 4),
-// ('John', 'Bawer', 6, 4),
-// ('Daniel', 'Orzo', 7, 8);
