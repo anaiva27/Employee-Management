@@ -30,7 +30,7 @@ CREATE TABLE employee (
      FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
      `manager_id` INT,
     PRIMARY KEY (id),--  INDEX manager_ind (manager_id),
-     FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE CASCADE
+     FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
 
 );
 
@@ -57,13 +57,13 @@ INSERT INTO employee
 (first_name, last_name, role_id, manager_id)
 VALUES ('Anastasia', 'Warren', 2, NULL),
 ('Jennifer', 'Morales', 1, NULL),
-('Jordan', 'Rosso', 4, NULL),
+('Jordan', 'Rosso', 4, 2),
 ('Chris', 'Nolan', 3, NULL),
-('Alexader', 'Crow', 4, NULL),
+('Alexader', 'Crow', 4, 4),
 ('Santa', 'Clauses', 2, 2),
-('Britney', 'Green', 5, NULL),
+('Britney', 'Green', 5, 4),
 ('Ryan', 'Simp', 1, NULL),
-('Jeff', 'McDonald', 4, NULL),
+('Jeff', 'McDonald', 4, 8),
 ('Brain', 'Kurts', 5, 4),
 ('John', 'Bawer', 6, 4),
 ('Daniel', 'Orzo', 7, 8);

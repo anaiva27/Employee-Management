@@ -51,14 +51,15 @@ class DB {
 
   addNewEmployee() {}
 
-  addNewDepartment(response){
-     return this.connection.query(
-        `INSERT INTO department (name) VALUE (?)`,
-        response.newDepartment,
-        function (err) {
-          if (err) throw err;
-        }
-  )}
+  addNewDepartment(response) {
+    return this.connection.query(
+      `INSERT INTO department (name) VALUE (?)`,
+      response.newDepartment,
+      function (err) {
+        if (err) throw err;
+      }
+    );
+  }
 
   addNewRole() {}
 
@@ -79,8 +80,11 @@ function mainPrompt() {
     function (err, res) {
       if (err) throw err;
       res.forEach((res2) => {
-        employees.push(`${res2.first_name} ${res2.last_name}`, res2.id);
-        employeesId.push({name:`${res2.first_name} ${res2.last_name}`, value: res2.id});
+        employees.push(`${res2.first_name} ${res2.last_name}`);
+        employeesId.push({
+          name: `${res2.first_name} ${res2.last_name}`,
+          value: res2.id,
+        });
       });
     }
   );
@@ -88,8 +92,11 @@ function mainPrompt() {
     res.forEach((res2) => {
       if (err) throw err;
       if (!res2.manager_id) {
-        managers.push(res2.first_name + " " + res2.last_name);
-        managersId.push(res2.id);
+        managers.push(`${res2.first_name} ${res2.last_name}`);
+        managersId.push({
+          name: res2.first_name + " " + res2.last_name,
+          value: res2.id,
+        });
       }
     });
   });
@@ -107,7 +114,7 @@ function mainPrompt() {
     res.forEach((res2) => {
       if (err) throw err;
       roles.push(res2.title);
-      rolesId.push({name: res2.title, value:res2.id});
+      rolesId.push({ name: res2.title, value: res2.id });
     });
   });
 
@@ -130,7 +137,7 @@ function mainPrompt() {
           value: "VIEW_ROLES",
         },
         {
-          name: "Add an employees",
+          name: "Add an employee",
           value: "ADD_EMPLOYEE",
         },
         {
@@ -223,6 +230,7 @@ async function viewRoles() {
 }
 
 function addEmployee() {
+  managersId.push({name: "no manager", value: null})
   let questions = [
     {
       type: "input",
@@ -237,21 +245,32 @@ function addEmployee() {
     {
       type: "list",
       message: `What is the new employee's role?`,
-      choices: roles,
+      choices: rolesId,
       name: "role",
     },
     {
       type: "list",
       message: `Who is the new employee's manager?`,
-      choices: managers,
+      choices: managersId,
       name: "manager",
     },
   ];
 
   inquirer.prompt(questions).then(function (response) {
-    createTable();
-    //   }
-    // );
+    connection.query(
+      `INSERT INTO employee SET ?`,
+      {
+        first_name: response.firstName,
+        last_name: response.lastName,
+        role_id: response.role,
+        manager_id: response.manager,
+      },
+      function (err, res) {
+        if (err) throw err;
+        console.log("The new role has been added");
+        mainPrompt();
+      }
+    );
   });
 }
 
@@ -262,18 +281,15 @@ function addDepartment() {
       type: "input",
       message: "What department would you like to add?",
     })
-    .then(function (response){ 
-     
-    db.addNewDepartment(response);
-    
-          console.log("----------");
-          console.log("Department has been successfully added");
-          console.log("----------");
-    mainPrompt();
-        })}
-      
-    
+    .then(function (response) {
+      db.addNewDepartment(response);
 
+      console.log("----------");
+      console.log("Department has been successfully added");
+      console.log("----------");
+      mainPrompt();
+    });
+}
 
 function deleteDepartment() {
   inquirer
@@ -311,7 +327,7 @@ function addRole() {
       message: "What is the salary?",
       validate: function (salary) {
         return !isNaN(salary);
-      }
+      },
     },
     {
       name: "departmentName",
@@ -338,7 +354,7 @@ function addRole() {
           function (err, res) {
             if (err) throw err;
             console.log("The new role has been added");
-            createTable();
+            mainPrompt();
           }
         );
       }
@@ -383,19 +399,20 @@ function updateRole() {
       message: "What is the new role?",
       choices: rolesId,
     },
-  ]
+  ];
   inquirer.prompt(roleUpdateQs).then(function (response) {
-    console.log(response)
+    console.log(response);
     // connection.query(SELECT )
-    connection. query('UPDATE employee SET ? WHERE ?', 
-        [
-            {
-                role_id: response.role
-            },
-            {
-                id: response.employee   
-            }
-        ],
+    connection.query(
+      "UPDATE employee SET ? WHERE ?",
+      [
+        {
+          role_id: response.role,
+        },
+        {
+          id: response.employee,
+        },
+      ],
 
       function (err) {
         if (err) throw err;
@@ -403,6 +420,20 @@ function updateRole() {
         console.log("Role has been successfully updated");
         console.log("----------");
         mainPrompt();
-      })})}
+      }
+    );
+  });
+}
 
-     
+// VALUES ('Anastasia', 'Warren', 2, 8),
+// ('Jennifer', 'Morales', 1, NULL),
+// ('Jordan', 'Rosso', 4, 8),
+// ('Chris', 'Nolan', 3, NULL),
+// ('Alexader', 'Crow', 4, 2),
+// ('Santa', 'Clauses', 2, 2),
+// ('Britney', 'Green', 5, 8),
+// ('Ryan', 'Simp', 1, NULL),
+// ('Jeff', 'McDonald', 4, 2),
+// ('Brain', 'Kurts', 5, 4),
+// ('John', 'Bawer', 6, 4),
+// ('Daniel', 'Orzo', 7, 8);
