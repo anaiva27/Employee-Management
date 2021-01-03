@@ -3,6 +3,7 @@ require("console.table");
 const util = require("util");
 // const db = require("./db")
 const mysql = require("mysql");
+const { CLIENT_RENEG_LIMIT } = require("tls");
 
 // logo?
 const connection = mysql.createConnection({
@@ -39,7 +40,7 @@ class DB {
   }
 
   viewAllDepartments() {
-    return connection.query(`SELECT * FROM department ORDER BY id`);
+    return this.connection.query(`SELECT * FROM department ORDER BY id`);
   }
 
   viewAllRoles() {
@@ -50,15 +51,14 @@ class DB {
 
   addNewEmployee() {}
 
-  addNewDepartment(){
-     return function (response) {
-      connection.query(
-        `INSERT INTO department (name) VALUES (?)`,
+  addNewDepartment(response){
+     return this.connection.query(
+        `INSERT INTO department (name) VALUE (?)`,
         response.newDepartment,
         function (err) {
           if (err) throw err;
         }
-  )}}
+  )}
 
   addNewRole() {}
 
@@ -79,7 +79,7 @@ function mainPrompt() {
     function (err, res) {
       if (err) throw err;
       res.forEach((res2) => {
-        employees.push(`${res2.first_name} ${res2.last_name}`);
+        employees.push(`${res2.first_name} ${res2.last_name}`, res2.id);
         employeesId.push(res2.id);
       });
     }
@@ -262,14 +262,13 @@ function addDepartment() {
       type: "input",
       message: "What department would you like to add?",
     })
-    .then( async function (response){ 
-    const employees = await db.viewAllRoles(response);
-   
-
+    .then(function (response){ 
+     
+    db.addNewDepartment(response);
+    
           console.log("----------");
           console.log("Department has been successfully added");
           console.log("----------");
-           console.table(employees);
     mainPrompt();
         })}
       
@@ -371,9 +370,42 @@ function deleteRole() {
 }
 
 function updateRole() {
-  // need role, role id, employee, employee id
-  // connection.query('SELECT * FROM employee ORDER BY employee.id', function(err,res){
-  //   res.forEach((item) => {
-  //   })
-  // });
-}
+  let roleUpdateQs = [
+    {
+      name: "employee",
+      type: "list",
+      message: "What is the name of the employee?",
+      choices: employees,
+    },
+    {
+      name: "role",
+      type: "list",
+      message: "What is the new role?",
+      choices: roles,
+    },
+  ]
+  inquirer.prompt(roleUpdateQs).then(function (response) {
+    console.log(response)
+    connection. query('UPDATE employee SET ? WHERE ?', 
+        [
+            {
+                role_id: response.role
+            },
+            {
+                id: response.employee   
+            }
+        ],
+    
+    // query(
+    //       "UPDATE employee SET role_id = ? WHERE id = ?",
+    //   [response.role, response.employee],
+
+      function (err) {
+        if (err) throw err;
+        console.log("----------");
+        console.log("Role has been successfully updated");
+        console.log("----------");
+        mainPrompt();
+      })})}
+
+     
