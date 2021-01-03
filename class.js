@@ -1,3 +1,4 @@
+const connection = require('./db/connection.js');
 // class with sql queries for employee, department, role manipulations
 class DB {
     constructor(connection) {
