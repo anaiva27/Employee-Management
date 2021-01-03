@@ -1,33 +1,9 @@
 const inquirer = require("inquirer");
 require("console.table");
-const util = require("util");
-// const db = require("./db")
-const mysql = require("mysql");
-const { CLIENT_RENEG_LIMIT } = require("tls");
+const connection = require('./db/connection.js');
 
-// logo?
-const connection = mysql.createConnection({
-  host: "localhost",
-
-  // Your port; if not 3306
-  port: 3306,
-
-  // Your username
-  user: "root",
-
-  // Your password
-  password: "27qweasd",
-  database: "employees",
-});
-
-// connect to the mysql server and sql database
-connection.query = util.promisify(connection.query);
-connection.connect(function (err) {
-  if (err) throw err;
-  // run the start function after the connection is made to prompt the user
+// run the start function after the connection is made to prompt the user
   mainPrompt();
-});
-
 // class with sql queries for employee, department, role manipulations
 class DB {
   constructor(connection) {
@@ -462,6 +438,6 @@ function updateRole() {
     console.log("----------");
     console.log("Role has been successfully updated");
     console.log("----------");
-    mainPrompt();
+    mainPrompt()
   });
 }
